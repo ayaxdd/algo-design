@@ -6,18 +6,16 @@ import (
 )
 
 func main() {
-	n := 3
-	manPref := make([][]int, n)
-	womanPref := make([][]int, n)
+	gc := NewGaleShapley(3)
 
-	fillPref(manPref, n)
-	fillPref(womanPref, n)
-
-	fmt.Println(manPref)
-	fmt.Println(womanPref)
+	fmt.Println(gc.menPref)
+	fmt.Println(gc.womenPref)
+	fmt.Println(gc.ranking)
+	fmt.Println(gc.Execute())
 }
 
-func fillPref(pref [][]int, n int) {
+func fillPref(pref [][]int) {
+	n := len(pref)
 	prefList := make([]int, n)
 	shuffleFunc := func(i, j int) {
 		prefList[i], prefList[j] = prefList[j], prefList[i]
@@ -27,10 +25,23 @@ func fillPref(pref [][]int, n int) {
 		prefList[i] = i
 	}
 
-	for m := range n {
-		if pref[m] == nil {
+	for h := range n {
+		if pref[h] == nil {
 			rand.Shuffle(n, shuffleFunc)
-			pref[m] = append(pref[m], prefList...)
+			pref[h] = append(pref[h], prefList...)
+		}
+	}
+}
+
+func fillRanking(ranking, womenPref [][]int) {
+	for w, men := range womenPref {
+		score := len(womenPref)
+		if ranking[w] == nil {
+			ranking[w] = make([]int, len(womenPref))
+		}
+		for _, m := range men {
+			ranking[w][m] = score
+			score--
 		}
 	}
 }
