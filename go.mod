@@ -1,3 +1,3 @@
-module github.com/ayaxdd/algo-design
+module github.com/ayaxdd/algorithm-design
 
 go 1.25.0
