@@ -1,20 +1,29 @@
 package ds
 
-import "slices"
+import (
+	"fmt"
+	"slices"
+)
 
-type Stack[T comparable] struct {
+type Stringer interface {
+	String() string
+	comparable
+}
+
+type Stack[T Stringer] struct {
 	elems []T
 	size  int
 }
 
-func NewStack[T comparable]() *Stack[T] {
+func NewStack[T Stringer]() *Stack[T] {
 	return &Stack[T]{
 		elems: make([]T, 0, 8),
 	}
 }
 
 func (s *Stack[T]) String() string {
-	return toString(s.elems)
+	return fmt.Sprintln(s.elems)
+	// return toString(s.elems)
 }
 
 func (s *Stack[T]) Push(item T) {
