@@ -1,32 +1,45 @@
 package ds
 
-type Stack struct {
-	elems []any
+import "slices"
+
+type Stack[T comparable] struct {
+	elems []T
+	size  int
 }
 
-func NewStack() *Stack {
-	return &Stack{}
+func NewStack[T comparable]() *Stack[T] {
+	return &Stack[T]{
+		elems: make([]T, 0, 8),
+	}
 }
 
-func (s *Stack) Push(item any) {
+func (s *Stack[T]) String() string {
+	return toString(s.elems)
+}
+
+func (s *Stack[T]) Push(item T) {
 	s.elems = append(s.elems, item)
+	s.size++
 }
 
-func (s *Stack) Pop() (any, bool) {
+func (s *Stack[T]) Pop() (T, bool) {
 	if s.IsEmpty() {
-		return nil, false
+		var zero T
+		return zero, false
 	}
 
 	lastIndex := len(s.elems) - 1
 	item := s.elems[lastIndex]
 	s.elems = s.elems[:lastIndex]
+	s.size--
 
 	return item, true
 }
 
-func (s *Stack) Peek() (any, bool) {
+func (s *Stack[T]) Peek() (T, bool) {
 	if s.IsEmpty() {
-		return nil, false
+		var zero T
+		return zero, false
 	}
 
 	lastIndex := len(s.elems) - 1
@@ -35,6 +48,10 @@ func (s *Stack) Peek() (any, bool) {
 	return item, true
 }
 
-func (s *Stack) IsEmpty() bool {
-	return len(s.elems) == 0
+func (s *Stack[T]) Contains(item T) bool {
+	return slices.Contains(s.elems, item)
+}
+
+func (s *Stack[T]) IsEmpty() bool {
+	return s.size == 0
 }
