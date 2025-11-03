@@ -1,32 +1,41 @@
 // Package ds
 package ds
 
-type Queue struct {
-	elems []any
+import "slices"
+
+type Queue[T Stringer] struct {
+	elems []T
+	size  int
 }
 
-func NewQueue() *Queue {
-	return &Queue{}
+func NewQueue[T Stringer]() *Queue[T] {
+	return &Queue[T]{
+		elems: make([]T, 0, 8),
+	}
 }
 
-func (q *Queue) Enqueue(item any) {
+func (q *Queue[T]) Enqueue(item T) {
 	q.elems = append(q.elems, item)
+	q.size++
 }
 
-func (q *Queue) Dequeue() (any, bool) {
+func (q *Queue[T]) Dequeue() (T, bool) {
 	if q.IsEmpty() {
-		return nil, false
+		var zero T
+		return zero, false
 	}
 
 	item := q.elems[0]
 	q.elems = q.elems[1:]
+	q.size--
 
 	return item, true
 }
 
-func (q *Queue) Peek() (any, bool) {
+func (q *Queue[T]) Peek() (T, bool) {
 	if q.IsEmpty() {
-		return nil, false
+		var zero T
+		return zero, false
 	}
 
 	item := q.elems[0]
@@ -34,6 +43,10 @@ func (q *Queue) Peek() (any, bool) {
 	return item, true
 }
 
-func (q *Queue) IsEmpty() bool {
-	return len(q.elems) == 0
+func (q *Queue[T]) Contains(item T) bool {
+	return slices.Contains(q.elems, item)
+}
+
+func (q *Queue[T]) IsEmpty() bool {
+	return q.size == 0
 }

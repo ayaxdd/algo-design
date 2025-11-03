@@ -5,11 +5,6 @@ import (
 	"slices"
 )
 
-type Stringer interface {
-	String() string
-	comparable
-}
-
 type Stack[T Stringer] struct {
 	elems []T
 	size  int
