@@ -1,7 +1,10 @@
 // Package ds
 package ds
 
-import "slices"
+import (
+	"fmt"
+	"slices"
+)
 
 type Queue[T Stringer] struct {
 	elems []T
@@ -12,6 +15,10 @@ func NewQueue[T Stringer]() *Queue[T] {
 	return &Queue[T]{
 		elems: make([]T, 0, 8),
 	}
+}
+
+func (q *Queue[T]) String() string {
+	return fmt.Sprintln(q.elems)
 }
 
 func (q *Queue[T]) Enqueue(item T) {

@@ -18,7 +18,6 @@ func NewStack[T Stringer]() *Stack[T] {
 
 func (s *Stack[T]) String() string {
 	return fmt.Sprintln(s.elems)
-	// return toString(s.elems)
 }
 
 func (s *Stack[T]) Push(item T) {
