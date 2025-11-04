@@ -19,6 +19,7 @@ func Bfs[T comparable](g *ds.Graph[T], s *ds.Node[T]) []*ds.Node[T] {
 		neighbours, _ := g.GetNeighbours(u)
 		for _, v := range neighbours {
 			if !discovered[v.GetID()] {
+				discovered[v.GetID()] = true
 				nodes = append(nodes, v)
 				q.Enqueue(v)
 			}
