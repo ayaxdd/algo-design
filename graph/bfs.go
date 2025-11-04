@@ -15,7 +15,7 @@ func Bfs[T comparable](g *ds.Graph[T], s *ds.Node[T]) []*ds.Node[T] {
 	que.Enqueue(s)
 
 	// i := 0
-	nodes := make([]*ds.Node[T], 0, 1)
+	nodes := make([]*ds.Node[T], 0, g.VerticesCnt())
 	nodes = append(nodes, s)
 
 	for !que.IsEmpty() {

@@ -12,7 +12,7 @@ func Dfs[T comparable](g *ds.Graph[T], s *ds.Node[T]) []*ds.Node[T] {
 	stack := ds.NewStack[*ds.Node[T]]()
 	stack.Push(s)
 
-	nodes := make([]*ds.Node[T], 0, 1)
+	nodes := make([]*ds.Node[T], 0, g.VerticesCnt())
 
 	for !stack.IsEmpty() {
 		u, _ := stack.Pop()
