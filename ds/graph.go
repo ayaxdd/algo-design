@@ -3,14 +3,17 @@ package ds
 import "fmt"
 
 type Node[T comparable] struct {
-	id    string
-	value T
+	id       string
+	value    T
+	inEdges  []*Edge[T]
+	outEdges []*Edge[T]
+	color    int
+	pred     *Node[T]
 }
 
-func NewNode[T comparable](id string, value T) *Node[T] {
+func NewNode[T comparable](id string) *Node[T] {
 	return &Node[T]{
-		id:    id,
-		value: value,
+		id: id,
 	}
 }
 
@@ -22,59 +25,87 @@ func (n *Node[T]) String() string {
 	return fmt.Sprintf("(%s:%v)", n.id, n.value)
 }
 
-type Graph[T comparable] struct {
-	edges    map[string]map[string]int // u -> (v -> w)
-	vertices map[string]*Node[T]
+type Edge[T comparable] struct {
+	u, v *Node[T] // src, dst
+	w    int      // weight
 }
 
-func NewGraph[T comparable]() *Graph[T] {
-	return &Graph[T]{
-		edges:    make(map[string]map[string]int),
-		vertices: make(map[string]*Node[T]),
+func NewEdge[T comparable](u, v *Node[T], w int) *Edge[T] {
+	return &Edge[T]{
+		u: u,
+		v: v,
+		w: w,
 	}
 }
 
-func (g *Graph[T]) AddVertex(v *Node[T]) bool {
-	if _, exists := g.vertices[v.id]; exists {
+func (e *Edge[T]) String() string {
+	return fmt.Sprintf("< %v -> %v > w: %d", e.u, e.v, e.w)
+}
+
+type Graph[T comparable] struct {
+	vertices map[string]*Node[T]
+	directed bool
+	weighted bool
+}
+
+func (g *Graph[T]) Vertex(id string) (*Node[T], bool) {
+	node, exists := g.vertices[id]
+	return node, exists
+}
+
+func NewGraph[T comparable](d, w bool) *Graph[T] {
+	return &Graph[T]{
+		vertices: make(map[string]*Node[T]),
+		directed: d,
+		weighted: w,
+	}
+}
+
+func (g *Graph[T]) AddVertex(id string) bool {
+	if _, exists := g.vertices[id]; exists {
 		return false
 	}
-	g.vertices[v.id] = v
+	g.vertices[id] = NewNode[T](id)
 	return true
 }
 
-func (g *Graph[T]) VerticesCnt() int {
+func (g *Graph[T]) Order() int {
 	return len(g.vertices)
 }
 
-func (g *Graph[T]) AddEdge(u, v *Node[T], w int) {
-	if _, exists := g.vertices[u.id]; !exists {
-		g.vertices[u.id] = u
-	}
-	if _, exists := g.vertices[v.id]; !exists {
-		g.vertices[v.id] = v
-	}
+func (g *Graph[T]) AddEdge(uID, vID string, w int) {
+	g.AddVertex(uID)
+	g.AddVertex(vID)
 
-	if _, exists := g.edges[u.id]; !exists {
-		g.edges[u.id] = make(map[string]int)
-	}
+	u := g.vertices[uID]
+	v := g.vertices[vID]
 
-	g.edges[u.id][v.id] = w
+	edge := NewEdge(u, v, w)
+
+	u.outEdges = append(u.outEdges, edge)
+	v.inEdges = append(v.inEdges, edge)
+
+	if !g.directed {
+		revEdge := NewEdge(v, u, w)
+		v.outEdges = append(v.outEdges, revEdge)
+		u.inEdges = append(u.inEdges, revEdge)
+	}
 }
 
-func (g *Graph[T]) GetNeighbours(n *Node[T]) ([]*Node[T], bool) {
-	neighboursMap := g.edges[n.id]
-	if neighboursMap == nil {
-		return nil, false
+func (g *Graph[T]) Neighbours(id string) []*Node[T] {
+	if _, exists := g.vertices[id]; !exists {
+		return nil
 	}
-	neighbours := make([]*Node[T], 0, len(neighboursMap))
 
-	for neighbour := range neighboursMap {
-		node := g.vertices[neighbour]
-		neighbours = append(neighbours, node)
+	edges := g.vertices[id].outEdges
+	neighbours := make([]*Node[T], 0, len(edges))
+	for _, e := range edges {
+		neighbours = append(neighbours, e.v)
 	}
-	return neighbours, true
+
+	return neighbours
 }
 
 func (g *Graph[T]) String() string {
-	return fmt.Sprintln(g.edges)
+	return fmt.Sprintln(g.vertices)
 }
