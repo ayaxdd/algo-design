@@ -22,7 +22,7 @@ func (n *Node[T]) GetID() string {
 }
 
 func (n *Node[T]) String() string {
-	return fmt.Sprintf("(%s:%v)", n.id, n.value)
+	return fmt.Sprintf("(%s:%v)\n", n.id, n.value)
 }
 
 type Edge[T comparable] struct {
@@ -39,7 +39,7 @@ func NewEdge[T comparable](u, v *Node[T], w int) *Edge[T] {
 }
 
 func (e *Edge[T]) String() string {
-	return fmt.Sprintf("< %v -> %v > w: %d", e.u, e.v, e.w)
+	return fmt.Sprintf("< %v -> %v > w: %d\n", e.u, e.v, e.w)
 }
 
 type Graph[T comparable] struct {
