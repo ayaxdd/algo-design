@@ -25,9 +25,6 @@ func Bfs[T comparable](g *ds.Graph[T], sID string) []*ds.Node[T] {
 	for !que.IsEmpty() {
 		u, _ := que.Dequeue()
 		neighbours := g.Neighbours(u.GetID())
-		if neighbours == nil {
-			continue
-		}
 		for _, v := range neighbours {
 			if !discovered[v.GetID()] {
 				discovered[v.GetID()] = true

@@ -24,9 +24,6 @@ func Dfs[T comparable](g *ds.Graph[T], sID string) []*ds.Node[T] {
 			explored[u.GetID()] = true
 			nodes = append(nodes, u)
 			neighbours := g.Neighbours(u.GetID())
-			if neighbours == nil {
-				continue
-			}
 			for _, v := range neighbours {
 				stack.Push(v)
 			}
