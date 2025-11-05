@@ -6,14 +6,14 @@ import (
 	"slices"
 )
 
-type Queue[T Stringer] struct {
+type Queue[T comparable] struct {
 	elems []T
 	size  int
 }
 
-func NewQueue[T Stringer]() *Queue[T] {
+func NewQueue[T comparable]() *Queue[T] {
 	return &Queue[T]{
-		elems: make([]T, 0, 8),
+		elems: make([]T, 0),
 	}
 }
 

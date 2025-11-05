@@ -5,14 +5,14 @@ import (
 	"slices"
 )
 
-type Stack[T Stringer] struct {
+type Stack[T comparable] struct {
 	elems []T
 	size  int
 }
 
-func NewStack[T Stringer]() *Stack[T] {
+func NewStack[T comparable]() *Stack[T] {
 	return &Stack[T]{
-		elems: make([]T, 0, 8),
+		elems: make([]T, 0),
 	}
 }
 
