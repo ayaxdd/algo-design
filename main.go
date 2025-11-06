@@ -19,5 +19,10 @@ func main() {
 	g.AddEdge("3", "4", 1)
 	fmt.Println(g)
 	nodes := graph.TopologicalSort(g, "0")
+	fmt.Println("iter:")
 	fmt.Println(nodes)
+
+	dfs := graph.DfsSort(g)
+	fmt.Println("dfs:")
+	fmt.Println(dfs)
 }
