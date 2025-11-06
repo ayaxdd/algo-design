@@ -7,7 +7,7 @@ type Node[T comparable] struct {
 	value    T
 	inEdges  []*Edge[T]
 	outEdges []*Edge[T]
-	color    int
+	Color    int
 	pred     *Node[T]
 }
 
@@ -21,8 +21,16 @@ func (n *Node[T]) GetID() string {
 	return n.id
 }
 
+func (n *Node[T]) InDeg() int {
+	return len(n.inEdges)
+}
+
+func (n *Node[T]) OutDeg() int {
+	return len(n.outEdges)
+}
+
 func (n *Node[T]) String() string {
-	return fmt.Sprintf("(%s:%v)\n", n.id, n.value)
+	return fmt.Sprintf("(%s)", n.id)
 }
 
 type Edge[T comparable] struct {
@@ -39,13 +47,22 @@ func NewEdge[T comparable](u, v *Node[T], w int) *Edge[T] {
 }
 
 func (e *Edge[T]) String() string {
-	return fmt.Sprintf("< %v -> %v > w: %d\n", e.u, e.v, e.w)
+	return fmt.Sprintf(" <%v->%v> w: %d", e.u, e.v, e.w)
 }
 
 type Graph[T comparable] struct {
+	adjList  map[string][]*Node[T]
 	vertices map[string]*Node[T]
 	directed bool
 	weighted bool
+}
+
+func NewGraph[T comparable](directed bool) *Graph[T] {
+	return &Graph[T]{
+		adjList:  make(map[string][]*Node[T]),
+		vertices: make(map[string]*Node[T]),
+		directed: directed,
+	}
 }
 
 func (g *Graph[T]) Vertex(id string) (*Node[T], bool) {
@@ -53,12 +70,12 @@ func (g *Graph[T]) Vertex(id string) (*Node[T], bool) {
 	return node, exists
 }
 
-func NewGraph[T comparable](d, w bool) *Graph[T] {
-	return &Graph[T]{
-		vertices: make(map[string]*Node[T]),
-		directed: d,
-		weighted: w,
+func (g *Graph[T]) Verteces() []*Node[T] {
+	verteces := make([]*Node[T], 0, g.Order())
+	for _, v := range g.vertices {
+		verteces = append(verteces, v)
 	}
+	return verteces
 }
 
 func (g *Graph[T]) AddVertex(id string) bool {
@@ -66,6 +83,9 @@ func (g *Graph[T]) AddVertex(id string) bool {
 		return false
 	}
 	g.vertices[id] = NewNode[T](id)
+	if _, exists := g.adjList[id]; !exists {
+		g.adjList[id] = make([]*Node[T], 0)
+	}
 	return true
 }
 
@@ -82,6 +102,7 @@ func (g *Graph[T]) AddEdge(uID, vID string, w int) {
 
 	edge := NewEdge(u, v, w)
 
+	g.adjList[uID] = append(g.adjList[uID], v)
 	u.outEdges = append(u.outEdges, edge)
 	v.inEdges = append(v.inEdges, edge)
 
@@ -93,19 +114,9 @@ func (g *Graph[T]) AddEdge(uID, vID string, w int) {
 }
 
 func (g *Graph[T]) Neighbours(id string) []*Node[T] {
-	if _, exists := g.vertices[id]; !exists {
-		return nil
-	}
-
-	edges := g.vertices[id].outEdges
-	neighbours := make([]*Node[T], 0, len(edges))
-	for _, e := range edges {
-		neighbours = append(neighbours, e.v)
-	}
-
-	return neighbours
+	return g.adjList[id]
 }
 
 func (g *Graph[T]) String() string {
-	return fmt.Sprintln(g.vertices)
+	return fmt.Sprintln(g.adjList)
 }
