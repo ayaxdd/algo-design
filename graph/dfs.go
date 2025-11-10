@@ -6,7 +6,7 @@ import (
 	"github.com/ayaxdd/algorithm-design/ds"
 )
 
-func Dfs[T comparable](g *ds.Graph[T], sID string) []*ds.Node[T] {
+func Dfs[T comparable](g *ds.Graph[T], sID T) []*ds.Node[T] {
 	if g == nil {
 		return nil
 	}
@@ -15,7 +15,7 @@ func Dfs[T comparable](g *ds.Graph[T], sID string) []*ds.Node[T] {
 		return nil
 	}
 
-	explored := ds.NewSet[string](g.Order())
+	explored := ds.NewSet[T](g.Order())
 
 	stack := ds.NewStack[*ds.Node[T]]()
 	stack.Push(s)
@@ -27,9 +27,9 @@ func Dfs[T comparable](g *ds.Graph[T], sID string) []*ds.Node[T] {
 		u, _ := stack.Pop()
 		nodes = append(nodes, u)
 
-		for _, v := range g.Neighbours(u.GetID()) {
-			if !explored.Contains(v.GetID()) {
-				explored.Add(v.GetID())
+		for _, v := range g.Neighbours(u.ID()) {
+			if !explored.Contains(v.ID()) {
+				explored.Add(v.ID())
 				stack.Push(v)
 			}
 		}
@@ -38,7 +38,7 @@ func Dfs[T comparable](g *ds.Graph[T], sID string) []*ds.Node[T] {
 	return nodes
 }
 
-func TopologicalSort[T comparable](g *ds.Graph[T], sID string) []*ds.Node[T] {
+func TopologicalSort[T comparable](g *ds.Graph[T], sID T) []*ds.Node[T] {
 	if g == nil {
 		return nil
 	}
@@ -47,29 +47,32 @@ func TopologicalSort[T comparable](g *ds.Graph[T], sID string) []*ds.Node[T] {
 		return nil
 	}
 
-	order := make([]*ds.Node[T], 0, g.Order())
-	source := ds.NewQueue[*ds.Node[T]]()
-	indegree := make(map[string]int, g.Order())
+	// TODO: find other way to calc indegree and outegree
 
-	for _, v := range g.Verteces() {
-		indegree[v.GetID()] = v.InDeg()
-		if v.InDeg() == 0 {
-			source.Enqueue(v)
-		}
-	}
+	return nil
+	// order := make([]*ds.Node[T], 0, g.Order())
+	// source := ds.NewQueue[*ds.Node[T]]()
+	// indegree := make(map[T]int, g.Order())
 
-	for !source.IsEmpty() {
-		curr, _ := source.Dequeue()
-		order = append(order, curr)
-		for _, neighbour := range g.Neighbours(curr.GetID()) {
-			indegree[neighbour.GetID()]--
-			if indegree[neighbour.GetID()] == 0 {
-				source.Enqueue(neighbour)
-			}
-		}
-	}
-
-	return order
+	// for _, v := range g.Vertices() {
+	// 	indegree[v.ID()] = v.InDeg()
+	// 	if v.InDeg() == 0 {
+	// 		source.Enqueue(v)
+	// 	}
+	// }
+	//
+	// for !source.IsEmpty() {
+	// 	curr, _ := source.Dequeue()
+	// 	order = append(order, curr)
+	// 	for _, neighbour := range g.Neighbours(curr.GetID()) {
+	// 		indegree[neighbour.GetID()]--
+	// 		if indegree[neighbour.GetID()] == 0 {
+	// 			source.Enqueue(neighbour)
+	// 		}
+	// 	}
+	// }
+	//
+	// return order
 }
 
 func DfsSort[T comparable](g *ds.Graph[T]) []*ds.Node[T] {
@@ -81,7 +84,7 @@ func DfsSort[T comparable](g *ds.Graph[T]) []*ds.Node[T] {
 	var dfs func(*ds.Node[T])
 	dfs = func(u *ds.Node[T]) {
 		u.Color = 1
-		for _, v := range g.Neighbours(u.GetID()) {
+		for _, v := range g.Neighbours(u.ID()) {
 			if v.Color == 0 {
 				dfs(v)
 			}
@@ -93,7 +96,7 @@ func DfsSort[T comparable](g *ds.Graph[T]) []*ds.Node[T] {
 		revOrder.Push(u)
 	}
 
-	for _, u := range g.Verteces() {
+	for _, u := range g.Vertices() {
 		if u.Color == 0 {
 			dfs(u)
 		}

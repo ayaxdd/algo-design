@@ -4,25 +4,21 @@ import (
 	"fmt"
 
 	"github.com/ayaxdd/algorithm-design/ds"
-	"github.com/ayaxdd/algorithm-design/graph"
 )
 
 func main() {
-	g := ds.NewGraph[int](true)
-	g.AddEdge("0", "1", 1)
-	g.AddEdge("0", "2", 1)
-	g.AddEdge("0", "4", 1)
-	g.AddEdge("1", "3", 1)
-	g.AddEdge("1", "4", 1)
-	g.AddEdge("2", "3", 1)
-	g.AddEdge("2", "4", 1)
-	g.AddEdge("3", "4", 1)
-	fmt.Println(g)
-	nodes := graph.TopologicalSort(g, "0")
-	fmt.Println("iter:")
-	fmt.Println(nodes)
+	g := ds.NewGraph[int](false)
 
-	dfs := graph.DfsSort(g)
-	fmt.Println("dfs:")
-	fmt.Println(dfs)
+	g.AddEdge(0, 1, 1)
+	g.AddEdge(0, 2, 1)
+	g.AddEdge(0, 4, 1)
+	g.AddEdge(1, 2, 1)
+	g.AddEdge(3, 4, 1)
+	g.AddEdge(2, 4, 1)
+	g.AddVertex(8)
+	g.AddEdge(8, 0, 9)
+	fmt.Println(g)
+	fmt.Println(g.Degree(7))
+	fmt.Println(g.Weight(7, 0))
+	fmt.Println(g.Edge(3, 4))
 }

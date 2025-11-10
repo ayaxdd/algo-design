@@ -1,76 +1,81 @@
 package ds
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Node[T comparable] struct {
-	id       string
-	value    T
-	inEdges  []*Edge[T]
-	outEdges []*Edge[T]
-	Color    int
-	pred     *Node[T]
+	id    T
+	Color int
+	// pred  T
 }
 
-func NewNode[T comparable](id string) *Node[T] {
+func NewNode[T comparable](id T) *Node[T] {
 	return &Node[T]{
 		id: id,
 	}
 }
 
-func (n *Node[T]) GetID() string {
+func (n *Node[T]) ID() T {
 	return n.id
 }
 
-func (n *Node[T]) InDeg() int {
-	return len(n.inEdges)
-}
-
-func (n *Node[T]) OutDeg() int {
-	return len(n.outEdges)
-}
-
-func (n *Node[T]) String() string {
-	return fmt.Sprintf("(%s)", n.id)
+func (n Node[T]) String() string {
+	return fmt.Sprintf("(%v)", n.id)
 }
 
 type Edge[T comparable] struct {
-	u, v *Node[T] // src, dst
-	w    int      // weight
+	u, v  *Node[T]
+	w     int
+	bound string
 }
 
-func NewEdge[T comparable](u, v *Node[T], w int) *Edge[T] {
-	return &Edge[T]{
-		u: u,
-		v: v,
-		w: w,
-	}
-}
-
-func (e *Edge[T]) String() string {
-	return fmt.Sprintf(" <%v->%v> w: %d", e.u, e.v, e.w)
+func (e Edge[T]) String() string {
+	return fmt.Sprintf("<%v%s%v> w: %d", e.u, e.bound, e.v, e.w)
 }
 
 type Graph[T comparable] struct {
-	adjList  map[string][]*Node[T]
-	vertices map[string]*Node[T]
+	edges    map[T]map[T]int
+	vertices map[T]*Node[T]
 	directed bool
-	weighted bool
+	// weighted bool
 }
 
 func NewGraph[T comparable](directed bool) *Graph[T] {
 	return &Graph[T]{
-		adjList:  make(map[string][]*Node[T]),
-		vertices: make(map[string]*Node[T]),
+		edges:    make(map[T]map[T]int),
+		vertices: make(map[T]*Node[T]),
 		directed: directed,
 	}
 }
 
-func (g *Graph[T]) Vertex(id string) (*Node[T], bool) {
+// TODO: func (g *Graph[T]) Transpose() *Graph[T] { return nil }
+
+func (g *Graph[T]) Vertex(id T) (*Node[T], bool) {
 	node, exists := g.vertices[id]
 	return node, exists
 }
 
-func (g *Graph[T]) Verteces() []*Node[T] {
+func (g *Graph[T]) Edge(uID, vID T) (*Edge[T], bool) {
+	if _, exists := g.edges[uID][vID]; !exists {
+		return nil, false
+	}
+
+	bound := "->"
+	if !g.directed {
+		bound = "--"
+	}
+
+	return &Edge[T]{
+		u:     g.vertices[uID],
+		v:     g.vertices[vID],
+		w:     g.edges[uID][vID],
+		bound: bound,
+	}, true
+}
+
+func (g *Graph[T]) Vertices() []*Node[T] {
 	verteces := make([]*Node[T], 0, g.Order())
 	for _, v := range g.vertices {
 		verteces = append(verteces, v)
@@ -78,13 +83,13 @@ func (g *Graph[T]) Verteces() []*Node[T] {
 	return verteces
 }
 
-func (g *Graph[T]) AddVertex(id string) bool {
+func (g *Graph[T]) AddVertex(id T) bool {
 	if _, exists := g.vertices[id]; exists {
 		return false
 	}
-	g.vertices[id] = NewNode[T](id)
-	if _, exists := g.adjList[id]; !exists {
-		g.adjList[id] = make([]*Node[T], 0)
+	g.vertices[id] = NewNode(id)
+	if _, exists := g.edges[id]; !exists {
+		g.edges[id] = make(map[T]int)
 	}
 	return true
 }
@@ -93,30 +98,56 @@ func (g *Graph[T]) Order() int {
 	return len(g.vertices)
 }
 
-func (g *Graph[T]) AddEdge(uID, vID string, w int) {
+func (g *Graph[T]) AddEdge(uID, vID T, w int) {
 	g.AddVertex(uID)
 	g.AddVertex(vID)
 
-	u := g.vertices[uID]
-	v := g.vertices[vID]
-
-	edge := NewEdge(u, v, w)
-
-	g.adjList[uID] = append(g.adjList[uID], v)
-	u.outEdges = append(u.outEdges, edge)
-	v.inEdges = append(v.inEdges, edge)
-
+	g.edges[uID][vID] = w
 	if !g.directed {
-		revEdge := NewEdge(v, u, w)
-		v.outEdges = append(v.outEdges, revEdge)
-		u.inEdges = append(u.inEdges, revEdge)
+		g.edges[vID][uID] = w
 	}
 }
 
-func (g *Graph[T]) Neighbours(id string) []*Node[T] {
-	return g.adjList[id]
+func (g *Graph[T]) Neighbours(id T) []*Node[T] {
+	neighbours := make([]*Node[T], 0, g.Degree(id))
+	for nID := range g.edges[id] {
+		neighbours = append(neighbours, g.vertices[nID])
+	}
+	return neighbours
 }
 
-func (g *Graph[T]) String() string {
-	return fmt.Sprintln(g.adjList)
+func (g *Graph[T]) Degree(id T) int {
+	return len(g.edges[id])
+}
+
+func (g *Graph[T]) Weight(uID, vID T) int {
+	return g.edges[uID][vID]
+}
+
+func (g Graph[T]) String() string {
+	if g.Order() == 0 {
+		return "graph = [[]]"
+	}
+
+	var sb strings.Builder
+	sb.WriteString("graph = [\n")
+
+	for uID, neighbours := range g.edges {
+		u := g.vertices[uID]
+		fmt.Fprintf(&sb, "\t%v: ", u)
+		sb.WriteByte('[')
+		first := true
+		for vID := range neighbours {
+			v := g.vertices[vID]
+			if !first {
+				sb.WriteString(", ")
+			}
+			fmt.Fprintf(&sb, "%v", v)
+			first = false
+		}
+		sb.WriteString("],\n")
+	}
+
+	sb.WriteByte(']')
+	return sb.String()
 }
