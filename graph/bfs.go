@@ -12,8 +12,8 @@ func Bfs[T comparable](g *ds.Graph[T], sID string) []*ds.Node[T] {
 		return nil
 	}
 
-	discovered := make(map[string]bool, g.Order())
-	discovered[sID] = true
+	discovered := ds.NewSet[string](g.Order())
+	discovered.Add(sID)
 
 	que := ds.NewQueue[*ds.Node[T]]()
 	que.Enqueue(s)
@@ -26,8 +26,8 @@ func Bfs[T comparable](g *ds.Graph[T], sID string) []*ds.Node[T] {
 		u, _ := que.Dequeue()
 		neighbours := g.Neighbours(u.GetID())
 		for _, v := range neighbours {
-			if !discovered[v.GetID()] {
-				discovered[v.GetID()] = true
+			if !discovered.Contains(v.GetID()) {
+				discovered.Add(v.GetID())
 				nodes = append(nodes, v)
 				que.Enqueue(v)
 			}

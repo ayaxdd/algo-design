@@ -10,8 +10,8 @@ type (
 	Set[T comparable] map[T]stub
 )
 
-func NewSet[T comparable]() Set[T] {
-	return make(Set[T])
+func NewSet[T comparable](cap int) Set[T] {
+	return make(Set[T], cap)
 }
 
 func (s Set[T]) Add(items ...T) {

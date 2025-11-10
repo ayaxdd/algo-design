@@ -15,11 +15,11 @@ func Dfs[T comparable](g *ds.Graph[T], sID string) []*ds.Node[T] {
 		return nil
 	}
 
-	explored := make(map[string]bool, g.Order())
+	explored := ds.NewSet[string](g.Order())
 
 	stack := ds.NewStack[*ds.Node[T]]()
 	stack.Push(s)
-	explored[s.GetID()] = true
+	explored.Add(sID)
 
 	nodes := make([]*ds.Node[T], 0, g.Order())
 
@@ -28,8 +28,8 @@ func Dfs[T comparable](g *ds.Graph[T], sID string) []*ds.Node[T] {
 		nodes = append(nodes, u)
 
 		for _, v := range g.Neighbours(u.GetID()) {
-			if !explored[v.GetID()] {
-				explored[v.GetID()] = true
+			if !explored.Contains(v.GetID()) {
+				explored.Add(v.GetID())
 				stack.Push(v)
 			}
 		}
