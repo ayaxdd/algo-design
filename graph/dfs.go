@@ -10,16 +10,17 @@ func Dfs[T comparable](g *ds.Graph[T], sID T) []*ds.Node[T] {
 	if g == nil {
 		return nil
 	}
+
 	s, exists := g.Vertex(sID)
 	if !exists {
 		return nil
 	}
 
 	explored := ds.NewSet[T](g.Order())
+	explored.Add(sID)
 
 	stack := ds.NewStack[*ds.Node[T]]()
 	stack.Push(s)
-	explored.Add(sID)
 
 	nodes := make([]*ds.Node[T], 0, g.Order())
 
@@ -42,6 +43,7 @@ func TopologicalSort[T comparable](g *ds.Graph[T], sID T) []*ds.Node[T] {
 	if g == nil {
 		return nil
 	}
+
 	_, exists := g.Vertex(sID)
 	if !exists {
 		return nil
@@ -79,9 +81,12 @@ func DfsSort[T comparable](g *ds.Graph[T]) []*ds.Node[T] {
 	if g == nil {
 		return nil
 	}
+
 	revOrder := ds.NewStack[*ds.Node[T]]()
+
 	// white grey black
 	var dfs func(*ds.Node[T])
+
 	dfs = func(u *ds.Node[T]) {
 		u.Color = 1
 		for _, v := range g.Neighbours(u.ID()) {
@@ -103,6 +108,7 @@ func DfsSort[T comparable](g *ds.Graph[T]) []*ds.Node[T] {
 	}
 
 	order := make([]*ds.Node[T], 0, g.Order())
+
 	for !revOrder.IsEmpty() {
 		v, _ := revOrder.Pop()
 		order = append(order, v)

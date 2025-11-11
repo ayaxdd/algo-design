@@ -32,7 +32,7 @@ type Edge[T comparable] struct {
 }
 
 func (e Edge[T]) String() string {
-	return fmt.Sprintf("<%v%s%v> w: %d", e.u, e.bound, e.v, e.w)
+	return fmt.Sprintf("edge: [%v%s%v] weight: %d", e.u, e.bound, e.v, e.w)
 }
 
 // TODO: Add graph iterator

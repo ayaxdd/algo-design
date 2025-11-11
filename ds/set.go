@@ -28,6 +28,7 @@ func (s Set[T]) Remove(items ...T) {
 
 func (s Set[T]) Contains(item T) bool {
 	_, exists := s[item]
+
 	return exists
 }
 
@@ -39,9 +40,11 @@ func (s Set[T]) Iterate(f func(T)) {
 
 func (s Set[T]) Clone() Set[T] {
 	cp := make(Set[T], s.Len())
+
 	s.Iterate(func(k T) {
 		cp.Add(k)
 	})
+
 	return cp
 }
 
@@ -55,9 +58,11 @@ func (s Set[T]) Clear() {
 
 func Union[T comparable](a, b Set[T]) Set[T] {
 	res := a.Clone()
+
 	b.Iterate(func(k T) {
 		res.Add(k)
 	})
+
 	return res
 }
 
@@ -65,22 +70,27 @@ func Intersection[T comparable](a, b Set[T]) Set[T] {
 	if b.Len() < a.Len() {
 		a, b = b, a
 	}
+
 	res := make(Set[T])
+
 	a.Iterate(func(k T) {
 		if b.Contains(k) {
 			res.Add(k)
 		}
 	})
+
 	return res
 }
 
 func Difference[T comparable](a, b Set[T]) Set[T] {
 	res := make(Set[T])
+
 	a.Iterate(func(k T) {
 		if !b.Contains(k) {
 			res.Add(k)
 		}
 	})
+
 	return res
 }
 
@@ -102,5 +112,6 @@ func (s Set[T]) String() string {
 	}
 
 	sb.WriteByte('}')
+
 	return sb.String()
 }

@@ -7,6 +7,7 @@ func Bfs[T comparable](g *ds.Graph[T], sID T) []*ds.Node[T] {
 	if g == nil {
 		return nil
 	}
+
 	s, exists := g.Vertex(sID)
 	if !exists {
 		return nil
