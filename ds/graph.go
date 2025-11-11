@@ -6,8 +6,10 @@ import (
 )
 
 type Node[T comparable] struct {
-	id    T
-	Color int
+	id        T
+	Color     int
+	inDegree  int
+	outDegree int
 	// pred  T
 }
 
@@ -19,6 +21,14 @@ func NewNode[T comparable](id T) *Node[T] {
 
 func (n *Node[T]) ID() T {
 	return n.id
+}
+
+func (n *Node[T]) InDegree() int {
+	return n.inDegree
+}
+
+func (n *Node[T]) OutDegree() int {
+	return n.outDegree
 }
 
 func (n Node[T]) String() string {
@@ -152,8 +162,13 @@ func (g *Graph[T]) AddEdge(uID, vID T, w int) {
 	g.AddVertex(uID)
 	g.AddVertex(vID)
 
+	u := g.vertices[uID]
+	v := g.vertices[vID]
+
 	g.edges[uID][vID] = w
 	g.eCnt++
+	u.outDegree++
+	v.inDegree++
 
 	if !g.directed {
 		g.edges[vID][uID] = w

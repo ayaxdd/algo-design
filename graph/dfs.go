@@ -49,32 +49,32 @@ func TopologicalSort[T comparable](g *ds.Graph[T], sID T) []*ds.Node[T] {
 		return nil
 	}
 
-	// TODO: find other way to calc indegree and outegree
+	order := make([]*ds.Node[T], 0, g.Order())
+	source := ds.NewQueue[*ds.Node[T]]()
+	indegree := make(map[T]int, g.Order())
 
-	return nil
-	// order := make([]*ds.Node[T], 0, g.Order())
-	// source := ds.NewQueue[*ds.Node[T]]()
-	// indegree := make(map[T]int, g.Order())
+	for _, v := range g.Vertices() {
+		in := v.InDegree()
+		indegree[v.ID()] = in
 
-	// for _, v := range g.Vertices() {
-	// 	indegree[v.ID()] = v.InDeg()
-	// 	if v.InDeg() == 0 {
-	// 		source.Enqueue(v)
-	// 	}
-	// }
-	//
-	// for !source.IsEmpty() {
-	// 	curr, _ := source.Dequeue()
-	// 	order = append(order, curr)
-	// 	for _, neighbour := range g.Neighbours(curr.GetID()) {
-	// 		indegree[neighbour.GetID()]--
-	// 		if indegree[neighbour.GetID()] == 0 {
-	// 			source.Enqueue(neighbour)
-	// 		}
-	// 	}
-	// }
-	//
-	// return order
+		if in == 0 {
+			source.Enqueue(v)
+		}
+	}
+
+	for !source.IsEmpty() {
+		curr, _ := source.Dequeue()
+		order = append(order, curr)
+
+		for _, neighbour := range g.Neighbours(curr.ID()) {
+			indegree[neighbour.ID()]--
+			if indegree[neighbour.ID()] == 0 {
+				source.Enqueue(neighbour)
+			}
+		}
+	}
+
+	return order
 }
 
 func DfsSort[T comparable](g *ds.Graph[T]) []*ds.Node[T] {
@@ -89,6 +89,7 @@ func DfsSort[T comparable](g *ds.Graph[T]) []*ds.Node[T] {
 
 	dfs = func(u *ds.Node[T]) {
 		u.Color = 1
+
 		for _, v := range g.Neighbours(u.ID()) {
 			if v.Color == 0 {
 				dfs(v)
@@ -97,6 +98,7 @@ func DfsSort[T comparable](g *ds.Graph[T]) []*ds.Node[T] {
 				fmt.Println("Cycle detected")
 			}
 		}
+
 		u.Color = 2
 		revOrder.Push(u)
 	}
