@@ -172,7 +172,8 @@ func (g *Graph[T]) AddEdge(uID, vID T, w int) {
 
 	if !g.directed {
 		g.edges[vID][uID] = w
-		g.eCnt++
+		u.inDegree = u.outDegree
+		v.outDegree = v.inDegree
 	}
 }
 
