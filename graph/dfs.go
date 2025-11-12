@@ -3,10 +3,10 @@ package graph
 import (
 	"fmt"
 
-	"github.com/ayaxdd/algorithm-design/types"
+	"github.com/ayaxdd/algorithm-design/collection"
 )
 
-func Dfs[T comparable](g *types.Graph[T], sID T) []*types.Node[T] {
+func Dfs[T comparable](g *collection.Graph[T], sID T) []*collection.Node[T] {
 	if g == nil {
 		return nil
 	}
@@ -16,13 +16,13 @@ func Dfs[T comparable](g *types.Graph[T], sID T) []*types.Node[T] {
 		return nil
 	}
 
-	explored := types.NewSet[T](g.Order())
+	explored := collection.NewSet[T](g.Order())
 	explored.Add(sID)
 
-	stack := types.NewStack[*types.Node[T]]()
+	stack := collection.NewStack[*collection.Node[T]]()
 	stack.Push(s)
 
-	nodes := make([]*types.Node[T], 0, g.Order())
+	nodes := make([]*collection.Node[T], 0, g.Order())
 
 	for !stack.IsEmpty() {
 		u, _ := stack.Pop()
@@ -39,7 +39,7 @@ func Dfs[T comparable](g *types.Graph[T], sID T) []*types.Node[T] {
 	return nodes
 }
 
-func TopologicalSort[T comparable](g *types.Graph[T], sID T) []*types.Node[T] {
+func TopologicalSort[T comparable](g *collection.Graph[T], sID T) []*collection.Node[T] {
 	if g == nil {
 		return nil
 	}
@@ -49,8 +49,8 @@ func TopologicalSort[T comparable](g *types.Graph[T], sID T) []*types.Node[T] {
 		return nil
 	}
 
-	order := make([]*types.Node[T], 0, g.Order())
-	source := types.NewQueue[*types.Node[T]]()
+	order := make([]*collection.Node[T], 0, g.Order())
+	source := collection.NewQueue[*collection.Node[T]]()
 	indegree := make(map[T]int, g.Order())
 
 	for _, v := range g.Vertices() {
@@ -77,17 +77,17 @@ func TopologicalSort[T comparable](g *types.Graph[T], sID T) []*types.Node[T] {
 	return order
 }
 
-func DfsSort[T comparable](g *types.Graph[T]) []*types.Node[T] {
+func DfsSort[T comparable](g *collection.Graph[T]) []*collection.Node[T] {
 	if g == nil {
 		return nil
 	}
 
-	revOrder := types.NewStack[*types.Node[T]]()
+	revOrder := collection.NewStack[*collection.Node[T]]()
 
 	// white grey black
-	var dfs func(*types.Node[T])
+	var dfs func(*collection.Node[T])
 
-	dfs = func(u *types.Node[T]) {
+	dfs = func(u *collection.Node[T]) {
 		u.Color = 1
 
 		for _, v := range g.Neighbours(u.ID()) {
@@ -109,7 +109,7 @@ func DfsSort[T comparable](g *types.Graph[T]) []*types.Node[T] {
 		}
 	}
 
-	order := make([]*types.Node[T], 0, g.Order())
+	order := make([]*collection.Node[T], 0, g.Order())
 
 	for !revOrder.IsEmpty() {
 		v, _ := revOrder.Pop()

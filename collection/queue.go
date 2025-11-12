@@ -1,5 +1,5 @@
 // Package types
-package types
+package collection
 
 import (
 	"fmt"
