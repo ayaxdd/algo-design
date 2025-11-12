@@ -1,4 +1,4 @@
-package ds
+package types
 
 import (
 	"fmt"
@@ -49,6 +49,12 @@ func (s *Stack[T]) Peek() (T, bool) {
 	item := s.elems[lastIndex]
 
 	return item, true
+}
+
+func (s *Stack[T]) Iterate(f func(T)) {
+	for i := len(s.elems) - 1; i >= 0; i-- {
+		f(s.elems[i])
+	}
 }
 
 func (s *Stack[T]) Contains(item T) bool {

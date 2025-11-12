@@ -1,5 +1,5 @@
-// Package ds
-package ds
+// Package types
+package types
 
 import (
 	"fmt"

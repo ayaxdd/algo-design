@@ -3,10 +3,10 @@ package graph
 import (
 	"fmt"
 
-	"github.com/ayaxdd/algorithm-design/ds"
+	"github.com/ayaxdd/algorithm-design/types"
 )
 
-func Dfs[T comparable](g *ds.Graph[T], sID T) []*ds.Node[T] {
+func Dfs[T comparable](g *types.Graph[T], sID T) []*types.Node[T] {
 	if g == nil {
 		return nil
 	}
@@ -16,13 +16,13 @@ func Dfs[T comparable](g *ds.Graph[T], sID T) []*ds.Node[T] {
 		return nil
 	}
 
-	explored := ds.NewSet[T](g.Order())
+	explored := types.NewSet[T](g.Order())
 	explored.Add(sID)
 
-	stack := ds.NewStack[*ds.Node[T]]()
+	stack := types.NewStack[*types.Node[T]]()
 	stack.Push(s)
 
-	nodes := make([]*ds.Node[T], 0, g.Order())
+	nodes := make([]*types.Node[T], 0, g.Order())
 
 	for !stack.IsEmpty() {
 		u, _ := stack.Pop()
@@ -39,7 +39,7 @@ func Dfs[T comparable](g *ds.Graph[T], sID T) []*ds.Node[T] {
 	return nodes
 }
 
-func TopologicalSort[T comparable](g *ds.Graph[T], sID T) []*ds.Node[T] {
+func TopologicalSort[T comparable](g *types.Graph[T], sID T) []*types.Node[T] {
 	if g == nil {
 		return nil
 	}
@@ -49,8 +49,8 @@ func TopologicalSort[T comparable](g *ds.Graph[T], sID T) []*ds.Node[T] {
 		return nil
 	}
 
-	order := make([]*ds.Node[T], 0, g.Order())
-	source := ds.NewQueue[*ds.Node[T]]()
+	order := make([]*types.Node[T], 0, g.Order())
+	source := types.NewQueue[*types.Node[T]]()
 	indegree := make(map[T]int, g.Order())
 
 	for _, v := range g.Vertices() {
@@ -77,17 +77,17 @@ func TopologicalSort[T comparable](g *ds.Graph[T], sID T) []*ds.Node[T] {
 	return order
 }
 
-func DfsSort[T comparable](g *ds.Graph[T]) []*ds.Node[T] {
+func DfsSort[T comparable](g *types.Graph[T]) []*types.Node[T] {
 	if g == nil {
 		return nil
 	}
 
-	revOrder := ds.NewStack[*ds.Node[T]]()
+	revOrder := types.NewStack[*types.Node[T]]()
 
 	// white grey black
-	var dfs func(*ds.Node[T])
+	var dfs func(*types.Node[T])
 
-	dfs = func(u *ds.Node[T]) {
+	dfs = func(u *types.Node[T]) {
 		u.Color = 1
 
 		for _, v := range g.Neighbours(u.ID()) {
@@ -109,7 +109,7 @@ func DfsSort[T comparable](g *ds.Graph[T]) []*ds.Node[T] {
 		}
 	}
 
-	order := make([]*ds.Node[T], 0, g.Order())
+	order := make([]*types.Node[T], 0, g.Order())
 
 	for !revOrder.IsEmpty() {
 		v, _ := revOrder.Pop()

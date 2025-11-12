@@ -3,11 +3,12 @@ package main
 import (
 	"fmt"
 
-	"github.com/ayaxdd/algorithm-design/ds"
+	"github.com/ayaxdd/algorithm-design/graph"
+	"github.com/ayaxdd/algorithm-design/types"
 )
 
 func main() {
-	g := ds.NewGraph[int](true)
+	g := types.NewGraph[int](true)
 
 	g.AddEdge(0, 1, 1)
 	g.AddEdge(0, 2, 1)
@@ -17,10 +18,13 @@ func main() {
 	g.AddEdge(2, 3, 1)
 	g.AddEdge(2, 4, 9)
 	g.AddEdge(3, 4, 8)
+	g.AddEdge(4, 0, 8)
 	fmt.Println(g)
-	t := g.Transpose()
-	es := t.Edges()
-	for _, e := range es {
-		fmt.Println(e)
+
+	for _, v := range g.Vertices() {
+		fmt.Printf("%v: in=%d; out=%d", v, v.InDegree(), v.OutDegree())
+		fmt.Println()
 	}
+
+	fmt.Println(graph.DfsSort(g))
 }

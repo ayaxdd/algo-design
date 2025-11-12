@@ -1,4 +1,4 @@
-package ds
+package types
 
 import (
 	"fmt"
@@ -64,7 +64,7 @@ func NewGraph[T comparable](directed bool) *Graph[T] {
 	}
 }
 
-func (g *Graph[T]) Transpose() *Graph[T] {
+func Transpose[T comparable](g *Graph[T]) *Graph[T] {
 	if !g.directed {
 		return g
 	}
@@ -84,22 +84,6 @@ func (g *Graph[T]) Transpose() *Graph[T] {
 	return t
 }
 
-func (g *Graph[T]) Vertex(id T) (*Node[T], bool) {
-	node, exists := g.vertices[id]
-
-	return node, exists
-}
-
-func (g *Graph[T]) Vertices() []*Node[T] {
-	verteces := make([]*Node[T], 0, g.vCnt)
-
-	for _, v := range g.vertices {
-		verteces = append(verteces, v)
-	}
-
-	return verteces
-}
-
 func (g *Graph[T]) AddVertex(id T) bool {
 	var exists bool
 
@@ -117,23 +101,40 @@ func (g *Graph[T]) AddVertex(id T) bool {
 	return true
 }
 
-// func (g *Graph[T]) Edge(uID, vID T) (*Edge[T], bool) {
-// 	if _, exists := g.edges[uID][vID]; !exists {
-// 		return nil, false
-// 	}
-//
-// 	bound := "->"
-// 	if !g.directed {
-// 		bound = "--"
-// 	}
-//
-// 	return &Edge[T]{
-// 		u:     g.vertices[uID],
-// 		v:     g.vertices[vID],
-// 		w:     g.edges[uID][vID],
-// 		bound: bound,
-// 	}, true
-// }
+func (g *Graph[T]) Vertex(id T) (*Node[T], bool) {
+	node, exists := g.vertices[id]
+
+	return node, exists
+}
+
+func (g *Graph[T]) Vertices() []*Node[T] {
+	verteces := make([]*Node[T], 0, g.vCnt)
+
+	for _, v := range g.vertices {
+		verteces = append(verteces, v)
+	}
+
+	return verteces
+}
+
+func (g *Graph[T]) AddEdge(uID, vID T, w int) {
+	g.AddVertex(uID)
+	g.AddVertex(vID)
+
+	u := g.vertices[uID]
+	v := g.vertices[vID]
+
+	g.edges[uID][vID] = w
+	g.eCnt++
+	u.outDegree++
+	v.inDegree++
+
+	if !g.directed {
+		g.edges[vID][uID] = w
+		u.inDegree = u.outDegree
+		v.outDegree = v.inDegree
+	}
+}
 
 func (g *Graph[T]) Edges() []*Edge[T] {
 	edges := make([]*Edge[T], 0, g.eCnt)
@@ -156,25 +157,6 @@ func (g *Graph[T]) Edges() []*Edge[T] {
 	}
 
 	return edges
-}
-
-func (g *Graph[T]) AddEdge(uID, vID T, w int) {
-	g.AddVertex(uID)
-	g.AddVertex(vID)
-
-	u := g.vertices[uID]
-	v := g.vertices[vID]
-
-	g.edges[uID][vID] = w
-	g.eCnt++
-	u.outDegree++
-	v.inDegree++
-
-	if !g.directed {
-		g.edges[vID][uID] = w
-		u.inDegree = u.outDegree
-		v.outDegree = v.inDegree
-	}
 }
 
 func (g *Graph[T]) Neighbours(id T) []*Node[T] {

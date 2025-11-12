@@ -1,9 +1,9 @@
 // Package graph
 package graph
 
-import "github.com/ayaxdd/algorithm-design/ds"
+import "github.com/ayaxdd/algorithm-design/types"
 
-func Bfs[T comparable](g *ds.Graph[T], sID T) []*ds.Node[T] {
+func Bfs[T comparable](g *types.Graph[T], sID T) []*types.Node[T] {
 	if g == nil {
 		return nil
 	}
@@ -13,14 +13,14 @@ func Bfs[T comparable](g *ds.Graph[T], sID T) []*ds.Node[T] {
 		return nil
 	}
 
-	discovered := ds.NewSet[T](g.Order())
+	discovered := types.NewSet[T](g.Order())
 	discovered.Add(sID)
 
-	que := ds.NewQueue[*ds.Node[T]]()
+	que := types.NewQueue[*types.Node[T]]()
 	que.Enqueue(s)
 
 	// i := 0
-	nodes := make([]*ds.Node[T], 0, g.Order())
+	nodes := make([]*types.Node[T], 0, g.Order())
 	nodes = append(nodes, s)
 
 	for !que.IsEmpty() {
