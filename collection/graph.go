@@ -6,8 +6,8 @@ import (
 )
 
 type Node[T comparable] struct {
-	id        T
-	Color     int
+	id T
+	// Color     int
 	inDegree  int
 	outDegree int
 	// pred  T
@@ -107,14 +107,14 @@ func (g *Graph[T]) Vertex(id T) (*Node[T], bool) {
 	return node, exists
 }
 
-func (g *Graph[T]) Vertices() []*Node[T] {
-	verteces := make([]*Node[T], 0, g.vCnt)
+func (g *Graph[T]) Vertices() Set[T] {
+	vertices := NewSet[T](g.vCnt)
 
 	for _, v := range g.vertices {
-		verteces = append(verteces, v)
+		vertices.Add(v.ID())
 	}
 
-	return verteces
+	return vertices
 }
 
 func (g *Graph[T]) AddEdge(uID, vID T, w int) {
@@ -159,11 +159,11 @@ func (g *Graph[T]) Edges() []*Edge[T] {
 	return edges
 }
 
-func (g *Graph[T]) Neighbours(id T) []*Node[T] {
-	neighbours := make([]*Node[T], 0, g.Degree(id))
+func (g *Graph[T]) Neighbours(id T) Set[T] {
+	neighbours := NewSet[T](g.Degree(id))
 
-	for nID := range g.edges[id] {
-		neighbours = append(neighbours, g.vertices[nID])
+	for vID := range g.edges[id] {
+		neighbours.Add(vID)
 	}
 
 	return neighbours
