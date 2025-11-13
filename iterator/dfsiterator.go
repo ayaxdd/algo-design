@@ -11,43 +11,38 @@ import (
 
 func NewDFSIterator[T comparable](g *collection.Graph[T], startID T) iter.Seq[T] {
 	return func(yield func(T) bool) {
-		visited := collection.NewSet[T](g.Order())
+		n := g.Order()
+		visited := collection.NewSet[T](n)
 
 		// startID path
-		if !visited.Contains(startID) {
-			return
-		}
 		if !dfs(g, startID, visited, yield) {
-			return
-		}
-		if visited.Len() >= g.Order() {
 			return
 		}
 
 		// other vertices paths (if exists)
-		for _, v := range g.Vertices() {
-			if visited.Contains(v.ID()) {
-				return
+		for vID := range g.Vertices() {
+			if visited.Contains(vID) {
+				continue
 			}
-			if !dfs(g, v.ID(), visited, yield) {
+			if !dfs(g, vID, visited, yield) {
 				return
 			}
 		}
 	}
 }
 
-func dfs[T comparable](g *collection.Graph[T], id T, visited collection.Set[T], yield func(T) bool) bool {
-	visited.Add(id)
+func dfs[T comparable](g *collection.Graph[T], uID T, visited collection.Set[T], yield func(T) bool) bool {
+	visited.Add(uID)
 
-	if !yield(id) {
+	if !yield(uID) {
 		return false
 	}
 
-	for _, v := range g.Neighbours(id) {
-		if visited.Contains(v.ID()) {
-			return false
+	for vID := range g.Neighbours(uID) {
+		if visited.Contains(vID) {
+			continue
 		}
-		if !dfs(g, v.ID(), visited, yield) {
+		if !dfs(g, vID, visited, yield) {
 			return false
 		}
 	}
