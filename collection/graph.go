@@ -110,8 +110,8 @@ func (g *Graph[T]) Vertex(id T) (*Node[T], bool) {
 func (g *Graph[T]) Vertices() Set[T] {
 	vertices := NewSet[T](g.vCnt)
 
-	for _, v := range g.vertices {
-		vertices.Add(v.ID())
+	for _, u := range g.vertices {
+		vertices.Add(u.ID())
 	}
 
 	return vertices
@@ -162,8 +162,8 @@ func (g *Graph[T]) Edges() []*Edge[T] {
 func (g *Graph[T]) Neighbours(id T) Set[T] {
 	neighbours := NewSet[T](g.Degree(id))
 
-	for vID := range g.edges[id] {
-		neighbours.Add(vID)
+	for uID := range g.edges[id] {
+		neighbours.Add(uID)
 	}
 
 	return neighbours

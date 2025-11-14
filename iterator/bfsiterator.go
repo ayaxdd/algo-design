@@ -8,7 +8,12 @@ import (
 
 func NewBFSIterator[T comparable](g *collection.Graph[T], startID T) iter.Seq[T] {
 	return func(yield func(T) bool) {
-		visited := collection.NewSet[T](g.Order())
+		n := g.Order()
+		visited := collection.NewSet[T](n)
+
+		if _, exists := g.Vertex(startID); !exists {
+			return
+		}
 
 		// startID path
 		if !bfs(g, startID, visited, yield) {
@@ -16,15 +21,15 @@ func NewBFSIterator[T comparable](g *collection.Graph[T], startID T) iter.Seq[T]
 		}
 
 		// other paths
-		for vID := range g.Vertices() {
-			if visited.Contains(vID) {
-				continue
-			}
-
-			if !bfs(g, vID, visited, yield) {
-				return
-			}
-		}
+		// for vID := range g.Vertices() {
+		// 	if visited.Contains(vID) {
+		// 		continue
+		// 	}
+		//
+		// 	if !bfs(g, vID, visited, yield) {
+		// 		return
+		// 	}
+		// }
 	}
 }
 

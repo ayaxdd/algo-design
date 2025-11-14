@@ -1,4 +1,4 @@
-// Package types
+// Package collection
 package collection
 
 import (
@@ -52,6 +52,10 @@ func (q *Queue[T]) Peek() (T, bool) {
 
 func (q *Queue[T]) Contains(item T) bool {
 	return slices.Contains(q.elems, item)
+}
+
+func (q *Queue[T]) Len() int {
+	return q.size
 }
 
 func (q *Queue[T]) IsEmpty() bool {

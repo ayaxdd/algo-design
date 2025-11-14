@@ -2,6 +2,7 @@ package collection
 
 import (
 	"fmt"
+	"iter"
 	"slices"
 )
 
@@ -51,14 +52,22 @@ func (s *Stack[T]) Peek() (T, bool) {
 	return item, true
 }
 
-func (s *Stack[T]) Iterate(f func(T)) {
-	for i := len(s.elems) - 1; i >= 0; i-- {
-		f(s.elems[i])
+func (s *Stack[T]) All() iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for i := len(s.elems) - 1; i >= 0; i-- {
+			if !yield(s.elems[i]) {
+				return
+			}
+		}
 	}
 }
 
 func (s *Stack[T]) Contains(item T) bool {
 	return slices.Contains(s.elems, item)
+}
+
+func (s *Stack[T]) Len() int {
+	return s.size
 }
 
 func (s *Stack[T]) IsEmpty() bool {

@@ -7,12 +7,16 @@ import (
 	"github.com/ayaxdd/algorithm-design/collection"
 )
 
-// TODO: Iterative approach + fmt if-statements
+// TODO: Iterative approach
 
 func NewDFSIterator[T comparable](g *collection.Graph[T], startID T) iter.Seq[T] {
 	return func(yield func(T) bool) {
 		n := g.Order()
 		visited := collection.NewSet[T](n)
+
+		if _, exists := g.Vertex(startID); !exists {
+			return
+		}
 
 		// startID path
 		if !dfs(g, startID, visited, yield) {
@@ -20,18 +24,23 @@ func NewDFSIterator[T comparable](g *collection.Graph[T], startID T) iter.Seq[T]
 		}
 
 		// other vertices paths (if exists)
-		for vID := range g.Vertices() {
-			if visited.Contains(vID) {
-				continue
-			}
-			if !dfs(g, vID, visited, yield) {
-				return
-			}
-		}
+		// for uID := range g.Vertices() {
+		// 	if visited.Contains(uID) {
+		// 		continue
+		// 	}
+		// 	if !dfs(g, uID, visited, yield) {
+		// 		return
+		// 	}
+		// }
 	}
 }
 
-func dfs[T comparable](g *collection.Graph[T], uID T, visited collection.Set[T], yield func(T) bool) bool {
+func dfs[T comparable](
+	g *collection.Graph[T],
+	uID T,
+	visited collection.Set[T],
+	yield func(T) bool,
+) bool {
 	visited.Add(uID)
 
 	if !yield(uID) {
