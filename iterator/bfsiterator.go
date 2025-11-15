@@ -8,8 +8,8 @@ import (
 
 func NewBFSIterator[T comparable](g *collection.Graph[T], startID T) iter.Seq[T] {
 	return func(yield func(T) bool) {
-		n := g.Order()
-		visited := collection.NewSet[T](n)
+		// n := g.Order()
+		visited := collection.NewSet[T]()
 
 		if _, exists := g.Vertex(startID); !exists {
 			return
