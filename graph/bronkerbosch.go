@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/ayaxdd/algorithm-design/collection"
@@ -8,6 +9,8 @@ import (
 
 type bronKerbosch[T comparable] struct {
 	result []collection.Set[T]
+	sets   int
+	ops    int
 }
 
 func MaxIndependentSets[T comparable](g *collection.Graph[T]) []collection.Set[T] {
@@ -22,66 +25,134 @@ func MaxIndependentSets[T comparable](g *collection.Graph[T]) []collection.Set[T
 
 	bk.maxIndepSets(g, current, candidates, excluded)
 
+	fmt.Printf("pivot\n\tres:%v\n\tsets:%d\n\tops:%d\n", bk.result, bk.sets, bk.ops)
+
 	return bk.result
 }
 
-func indepPivot[T comparable](g *collection.Graph[T], candidates, excluded collection.Set[T]) T {
-	var pivotID T
-	minDeg := math.MaxInt32
+// \Delta(x) = |N(x) \cap candidates|
+// \Delta(x) -> min
+// if \Delta(x) == 0 => can't extend nextCurrent
 
-	for xID := range excluded {
-		neighbours := g.Neighbours(xID)
-		intersect := collection.Intersection(candidates, neighbours)
-		delta := intersect.Len()
-
-		if delta == 0 {
-			return xID
-		}
-
-		if delta < minDeg {
-			minDeg = delta
-			pivotID = xID
+func delta[T comparable](g *collection.Graph[T], candidates, excluded collection.Set[T]) (T, collection.Set[T], bool) {
+	if excluded.IsEmpty() {
+		for x := range candidates {
+			return x, candidates, true
 		}
 	}
 
-	return pivotID
+	var (
+		bestDelta = math.MaxInt32
+		bestX     T
+		bestSet   collection.Set[T]
+	)
+
+	for x := range excluded {
+		inter := collection.Intersection(candidates, g.Neighbours(x))
+		delta := inter.Len()
+
+		if delta < bestDelta {
+			bestDelta = delta
+			bestX = x
+			bestSet = inter
+		}
+	}
+
+	if bestSet.IsEmpty() {
+		return bestX, nil, false
+	}
+
+	return bestX, bestSet, true
+}
+
+func hasEmptyIntersection[T comparable](g *collection.Graph[T], candidates, excluded collection.Set[T]) bool {
+	for x := range excluded {
+		if collection.Intersection(candidates, g.Neighbours(x)).IsEmpty() {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (bk *bronKerbosch[T]) maxIndepSets(g *collection.Graph[T], current, candidates, excluded collection.Set[T]) {
-	for !candidates.IsEmpty() {
-		var pivotID T
+	if candidates.IsEmpty() && excluded.IsEmpty() {
+		bk.result = append(bk.result, current)
+		bk.sets++
 
-		if excluded.IsEmpty() {
-			for pID := range candidates {
-				pivotID = pID
-				break
-			}
-		} else {
-			pivotID = indepPivot(g, candidates, excluded)
-		}
+		return
+	}
 
-		neighbours := g.Neighbours(pivotID)
+	if hasEmptyIntersection(g, candidates, excluded) {
+		return
+	}
 
-		intersect := collection.Intersection(candidates, neighbours)
+	_, seek, ok := delta(g, candidates, excluded)
 
-		for xID := range intersect {
-			nextCurrent := current.Clone()
-			nextCurrent.Add(xID)
+	if !ok {
+		return
+	}
 
-			nextNeighbours := g.Neighbours(xID)
-			nextCandidates := collection.Difference(candidates, nextNeighbours)
-			nextCandidates.Remove(xID)
+	for x := range seek {
+		bk.ops++
 
-			nextExcluded := collection.Difference(excluded, nextNeighbours)
+		nextCurrent := current.Clone()
+		nextCurrent.Add(x)
 
-			if nextCandidates.IsEmpty() && nextExcluded.IsEmpty() {
-				bk.result = append(bk.result, current)
-			}
+		nextNeighbours := g.Neighbours(x)
+		nextCandidates := collection.Difference(candidates, nextNeighbours)
+		nextCandidates.Remove(x)
 
-			bk.maxIndepSets(g, nextCurrent, nextCandidates, nextExcluded)
+		nextExcluded := collection.Difference(excluded, nextNeighbours)
 
-			candidates.Remove(xID)
-			excluded.Add(xID)
-		}
+		bk.maxIndepSets(g, nextCurrent, nextCandidates, nextExcluded)
+
+		candidates.Remove(x)
+		excluded.Add(x)
+	}
+}
+
+func Sec[T comparable](g *collection.Graph[T]) []collection.Set[T] {
+	if g == nil {
+		return nil
+	}
+
+	bk := bronKerbosch[T]{}
+
+	current := collection.NewSet[T]()
+	candidates := g.Vertices()
+	excluded := collection.NewSet[T]()
+
+	bk.sec(g, current, candidates, excluded)
+
+	fmt.Printf("no pivot\n\tres:%v\n\tsets:%d\n\tops:%d\n", bk.result, bk.sets, bk.ops)
+
+	return bk.result
+}
+
+func (bk *bronKerbosch[T]) sec(g *collection.Graph[T], current, candidates, excluded collection.Set[T]) {
+	if candidates.IsEmpty() && excluded.IsEmpty() {
+		bk.result = append(bk.result, current)
+		bk.sets++
+
+		return
+	}
+
+	for id := range candidates {
+		bk.ops++
+
+		nextCurrent := current.Clone()
+		nextCurrent.Add(id)
+
+		nextNeighbours := g.Neighbours(id)
+		nextCandidates := collection.Difference(candidates, nextNeighbours)
+		nextCandidates.Remove(id)
+
+		nextExcluded := collection.Difference(excluded, nextNeighbours)
+
+		bk.sec(g, nextCurrent, nextCandidates, nextExcluded)
+
+		candidates.Remove(id)
+		excluded.Add(id)
 	}
 }
