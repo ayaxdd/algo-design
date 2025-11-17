@@ -28,5 +28,5 @@ func main() {
 	fmt.Println(g)
 
 	graph.MaxIndependentSets(g)
-	graph.Sec(g)
+	graph.MaxCliques(g)
 }

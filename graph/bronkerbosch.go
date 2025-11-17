@@ -13,21 +13,133 @@ type bronKerbosch[T comparable] struct {
 	ops    int
 }
 
+type storage[T comparable] struct {
+	current, candidates, excluded collection.Set[T]
+}
+
+func newStorage[T comparable](g *collection.Graph[T]) storage[T] {
+	return storage[T]{
+		current:    collection.NewSet[T](),
+		candidates: g.Vertices().Clone(),
+		excluded:   collection.NewSet[T](),
+	}
+}
+
 func MaxIndependentSets[T comparable](g *collection.Graph[T]) []collection.Set[T] {
 	if g == nil {
 		return nil
 	}
 
 	bk := &bronKerbosch[T]{}
-	current := collection.NewSet[T]()
-	candidates := g.Vertices()
-	excluded := collection.NewSet[T]()
+	s := newStorage(g)
 
-	bk.maxIndepSets(g, current, candidates, excluded)
+	bk.maxIndepSets(g, s.current, s.candidates, s.excluded)
 
-	fmt.Printf("pivot\n\tres:%v\n\tsets:%d\n\tops:%d\n", bk.result, bk.sets, bk.ops)
+	fmt.Printf("max independent sets:\n\tres:%v\n\tsets:%d\n\tops:%d\n", bk.result, bk.sets, bk.ops)
 
 	return bk.result
+}
+
+func MaxCliques[T comparable](g *collection.Graph[T]) []collection.Set[T] {
+	if g == nil {
+		return nil
+	}
+
+	bk := &bronKerbosch[T]{}
+	s := newStorage(g)
+
+	bk.maxCliques(g, s.current, s.candidates, s.excluded)
+
+	fmt.Printf("max cliques:\n\tres:%v\n\tsets:%d\n\tops:%d\n", bk.result, bk.sets, bk.ops)
+
+	return bk.result
+}
+
+func (bk *bronKerbosch[T]) maxIndepSets(g *collection.Graph[T], current, candidates, excluded collection.Set[T]) {
+	if candidates.IsEmpty() && excluded.IsEmpty() {
+		bk.result = append(bk.result, current)
+		bk.sets++
+
+		return
+	}
+
+	if hasEmptyIntersection(g, candidates, excluded) {
+		return
+	}
+
+	_, seek, ok := delta(g, candidates, excluded)
+
+	if !ok {
+		return
+	}
+
+	for x := range seek {
+		bk.ops++
+
+		nextCurrent := current.Clone()
+		nextCurrent.Add(x)
+
+		nextNeighbours := g.Neighbours(x)
+		nextCandidates := collection.Difference(candidates, nextNeighbours)
+		nextCandidates.Remove(x)
+
+		nextExcluded := collection.Difference(excluded, nextNeighbours)
+
+		bk.maxIndepSets(g, nextCurrent, nextCandidates, nextExcluded)
+
+		candidates.Remove(x)
+		excluded.Add(x)
+	}
+}
+
+func (bk *bronKerbosch[T]) maxCliques(g *collection.Graph[T], current, candidates, excluded collection.Set[T]) {
+	if candidates.IsEmpty() && excluded.IsEmpty() {
+		if current.Len() < 2 {
+			return
+		}
+
+		bk.result = append(bk.result, current)
+		bk.sets++
+
+		return
+	}
+
+	var (
+		unionSet  = collection.Union(candidates, excluded)
+		pivotID   T
+		maxDegree = -1
+	)
+
+	if unionSet.IsEmpty() {
+		return
+	}
+
+	for x := range unionSet {
+		deg := g.Degree(x)
+
+		if deg > maxDegree {
+			maxDegree = deg
+			pivotID = x
+		}
+	}
+
+	seek := collection.Difference(candidates, g.Neighbours(pivotID))
+
+	for x := range seek {
+		bk.ops++
+
+		nextCurrent := current.Clone()
+		nextCurrent.Add(x)
+
+		nextNeighbours := g.Neighbours(x)
+		nextCandidates := collection.Intersection(candidates, nextNeighbours)
+		nextExcluded := collection.Intersection(excluded, nextNeighbours)
+
+		bk.maxCliques(g, nextCurrent, nextCandidates, nextExcluded)
+
+		candidates.Remove(x)
+		excluded.Add(x)
+	}
 }
 
 // \Delta(x) = |N(x) \cap candidates|
@@ -73,86 +185,4 @@ func hasEmptyIntersection[T comparable](g *collection.Graph[T], candidates, excl
 	}
 
 	return false
-}
-
-func (bk *bronKerbosch[T]) maxIndepSets(g *collection.Graph[T], current, candidates, excluded collection.Set[T]) {
-	if candidates.IsEmpty() && excluded.IsEmpty() {
-		bk.result = append(bk.result, current)
-		bk.sets++
-
-		return
-	}
-
-	if hasEmptyIntersection(g, candidates, excluded) {
-		return
-	}
-
-	_, seek, ok := delta(g, candidates, excluded)
-
-	if !ok {
-		return
-	}
-
-	for x := range seek {
-		bk.ops++
-
-		nextCurrent := current.Clone()
-		nextCurrent.Add(x)
-
-		nextNeighbours := g.Neighbours(x)
-		nextCandidates := collection.Difference(candidates, nextNeighbours)
-		nextCandidates.Remove(x)
-
-		nextExcluded := collection.Difference(excluded, nextNeighbours)
-
-		bk.maxIndepSets(g, nextCurrent, nextCandidates, nextExcluded)
-
-		candidates.Remove(x)
-		excluded.Add(x)
-	}
-}
-
-func Sec[T comparable](g *collection.Graph[T]) []collection.Set[T] {
-	if g == nil {
-		return nil
-	}
-
-	bk := bronKerbosch[T]{}
-
-	current := collection.NewSet[T]()
-	candidates := g.Vertices()
-	excluded := collection.NewSet[T]()
-
-	bk.sec(g, current, candidates, excluded)
-
-	fmt.Printf("no pivot\n\tres:%v\n\tsets:%d\n\tops:%d\n", bk.result, bk.sets, bk.ops)
-
-	return bk.result
-}
-
-func (bk *bronKerbosch[T]) sec(g *collection.Graph[T], current, candidates, excluded collection.Set[T]) {
-	if candidates.IsEmpty() && excluded.IsEmpty() {
-		bk.result = append(bk.result, current)
-		bk.sets++
-
-		return
-	}
-
-	for id := range candidates {
-		bk.ops++
-
-		nextCurrent := current.Clone()
-		nextCurrent.Add(id)
-
-		nextNeighbours := g.Neighbours(id)
-		nextCandidates := collection.Difference(candidates, nextNeighbours)
-		nextCandidates.Remove(id)
-
-		nextExcluded := collection.Difference(excluded, nextNeighbours)
-
-		bk.sec(g, nextCurrent, nextCandidates, nextExcluded)
-
-		candidates.Remove(id)
-		excluded.Add(id)
-	}
 }
