@@ -7,8 +7,45 @@ import (
 	"sort"
 )
 
+type Task struct {
+	Time, Limit int
+	// Start int // start time
+}
+
 type Interval struct {
 	Start, Finish int
+}
+
+func TaskScheduling(tasks []Task) []Interval {
+	intervals := make([]Interval, 0, len(tasks))
+
+	// sort by limit
+
+	fmt.Println("before sorting:")
+	fmt.Println(tasks)
+
+	sort.Slice(tasks, func(i, j int) bool {
+		return tasks[i].Limit < tasks[j].Limit
+	})
+
+	fmt.Println("after sorting:")
+	fmt.Println(tasks)
+
+	f := 0
+
+	for _, t := range tasks {
+		interval := Interval{
+			Start:  f,
+			Finish: f + t.Time,
+		}
+		intervals = append(intervals, interval)
+		f += t.Time
+	}
+
+	fmt.Println("after scheduling:")
+	fmt.Println(intervals)
+
+	return intervals
 }
 
 func IntervalScheduling(intervals []Interval) []Interval {
@@ -21,13 +58,13 @@ func IntervalScheduling(intervals []Interval) []Interval {
 
 	fmt.Println("before sorting:")
 	fmt.Println(intervals)
-	fmt.Println("after sorting:")
 
 	// sort by finish
 	sort.Slice(intervals, func(i, j int) bool {
 		return intervals[i].Finish < intervals[j].Finish
 	})
 
+	fmt.Println("after sorting:")
 	fmt.Println(intervals)
 
 	result = append(result, intervals[0])
@@ -111,4 +148,12 @@ func TestIntervals() {
 	}
 
 	AllIntervalScheduling(intervals)
+
+	tasks := make([]Task, 0, 3)
+
+	tasks = append(tasks, Task{Time: 3, Limit: 6})
+	tasks = append(tasks, Task{Time: 1, Limit: 2})
+	tasks = append(tasks, Task{Time: 2, Limit: 4})
+
+	TaskScheduling(tasks)
 }
