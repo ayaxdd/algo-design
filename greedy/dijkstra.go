@@ -9,22 +9,24 @@ import (
 )
 
 func DijkstraPathFind[T comparable](g *collection.Graph[T], startID T) {
+	n := g.Order()
+	pred := make(map[T]T, n)
+	paths := make(map[T]int, n)
+	visited := collection.NewSet[T]()
+
+	for uID := range g.Vertices() {
+		paths[uID] = math.MaxInt32
+	}
+
 	var h collection.MinHeap[int]
 
-	n := g.Order()
+	paths[startID] = 0
+	heap.Init(&h)
 	s := &collection.Item[int]{
 		Key: 0,
 		Val: startID,
 	}
-
-	heap.Init(&h)
 	heap.Push(&h, s)
-
-	paths := make(map[T]int, n)
-	for uID := range g.Vertices() {
-		paths[uID] = math.MaxInt32
-	}
-	paths[startID] = 0
 
 	for h.Len() > 0 {
 		u := heap.Pop(&h).(*collection.Item[int])
@@ -36,6 +38,12 @@ func DijkstraPathFind[T comparable](g *collection.Graph[T], startID T) {
 			return
 		}
 
+		if visited.Contains(uID) {
+			continue
+		}
+
+		visited.Add(uID)
+
 		for vID := range g.Neighbours(uID) {
 			vDistance := uDistance + g.Weight(uID, vID)
 
@@ -46,9 +54,11 @@ func DijkstraPathFind[T comparable](g *collection.Graph[T], startID T) {
 					Val: vID,
 				}
 				heap.Push(&h, v)
+				pred[vID] = uID
 			}
 		}
 	}
 
 	fmt.Println(paths)
+	fmt.Println(pred)
 }
