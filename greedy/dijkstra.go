@@ -17,10 +17,10 @@ func DijkstraPathFind[T comparable](g *collection.Graph[T], startID T) {
 	for uID := range g.Vertices() {
 		paths[uID] = math.MaxInt32
 	}
+	paths[startID] = 0
 
 	var h collection.MinHeap[int]
 
-	paths[startID] = 0
 	heap.Init(&h)
 	s := &collection.Item[int]{
 		Key: 0,
@@ -47,7 +47,7 @@ func DijkstraPathFind[T comparable](g *collection.Graph[T], startID T) {
 		for vID := range g.Neighbours(uID) {
 			vDistance := uDistance + g.Weight(uID, vID)
 
-			if vDistance < paths[vID] {
+			if !visited.Contains(vID) && vDistance < paths[vID] {
 				paths[vID] = vDistance
 				v := &collection.Item[int]{
 					Key: vDistance,
