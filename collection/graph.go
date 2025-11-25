@@ -2,15 +2,14 @@ package collection
 
 import (
 	"fmt"
+	"iter"
 	"strings"
 )
 
 type Node[T comparable] struct {
-	id T
-	// Color     int
+	id        T
 	inDegree  int
 	outDegree int
-	// pred  T
 }
 
 func NewNode[T comparable](id T) *Node[T] {
@@ -35,17 +34,23 @@ func (n Node[T]) String() string {
 	return fmt.Sprintf("(%v)", n.id)
 }
 
-type Edge[T comparable] struct {
-	u, v  *Node[T]
-	w     int
-	bound string
-}
-
-func (e Edge[T]) String() string {
-	return fmt.Sprintf("edge: [%v%s%v] weight: %d", e.u, e.bound, e.v, e.w)
-}
-
-// TODO: Add graph iterator
+// type Edge[T comparable] struct {
+// 	uID, vID T
+// 	w        int
+// 	bound    string
+// }
+//
+// func (e *Edge[T]) IDs() (T, T) {
+// 	return e.uID, e.vID
+// }
+//
+// func (e *Edge[T]) Weight() int {
+// 	return e.w
+// }
+//
+// func (e Edge[T]) String() string {
+// 	return fmt.Sprintf("edge: [%v%s%v] weight: %d", e.uID, e.bound, e.vID, e.w)
+// }
 
 type Graph[T comparable] struct {
 	edges    map[T]map[T]int
@@ -53,7 +58,6 @@ type Graph[T comparable] struct {
 	directed bool
 	vCnt     int
 	eCnt     int
-	// weighted bool
 }
 
 func NewGraph[T comparable](directed bool) *Graph[T] {
@@ -65,23 +69,31 @@ func NewGraph[T comparable](directed bool) *Graph[T] {
 }
 
 func Transpose[T comparable](g *Graph[T]) *Graph[T] {
-	if !g.directed {
-		return g
+	return g.clone(true)
+}
+
+func (g *Graph[T]) Clone() *Graph[T] {
+	return g.clone(false)
+}
+
+func (g *Graph[T]) clone(transposed bool) *Graph[T] {
+	cp := NewGraph[T](g.directed)
+
+	for uID := range g.Vertices() {
+		cp.AddVertex(uID)
 	}
 
-	t := &Graph[T]{
-		edges:    make(map[T]map[T]int, g.eCnt),
-		vertices: g.vertices, // maybe should make a copy of vertices
-		directed: g.directed,
-	}
+	for uID, vID := range g.Edges() {
+		w := g.edges[uID][vID]
 
-	for uID := range g.edges {
-		for vID := range g.edges[uID] {
-			t.AddEdge(vID, uID, g.edges[uID][vID])
+		if transposed {
+			cp.AddEdge(vID, uID, w)
+		} else {
+			cp.AddEdge(uID, vID, w)
 		}
 	}
 
-	return t
+	return cp
 }
 
 func (g *Graph[T]) AddVertex(id T) bool {
@@ -107,14 +119,14 @@ func (g *Graph[T]) Vertex(id T) (*Node[T], bool) {
 	return node, exists
 }
 
-func (g *Graph[T]) Vertices() Set[T] {
-	vertices := NewSet[T]()
-
-	for _, u := range g.vertices {
-		vertices.Add(u.ID())
+func (g *Graph[T]) Vertices() iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for uID := range g.vertices {
+			if !yield(uID) {
+				return
+			}
+		}
 	}
-
-	return vertices
 }
 
 func (g *Graph[T]) AddEdge(uID, vID T, w int) {
@@ -136,37 +148,34 @@ func (g *Graph[T]) AddEdge(uID, vID T, w int) {
 	}
 }
 
-func (g *Graph[T]) Edges() []*Edge[T] {
-	edges := make([]*Edge[T], 0, g.eCnt)
-	bound := "->"
+func (g *Graph[T]) Edges() iter.Seq2[T, T] {
+	return func(yield func(T, T) bool) {
+		visited := NewSet[T]()
 
-	if !g.directed {
-		bound = "--"
-	}
+		for uID := range g.edges {
+			visited.Add(uID)
 
-	for uID := range g.edges {
-		for vID := range g.edges[uID] {
-			e := &Edge[T]{
-				u:     g.vertices[uID],
-				v:     g.vertices[vID],
-				w:     g.edges[uID][vID],
-				bound: bound,
+			for vID := range g.edges[uID] {
+				if visited.Contains(vID) {
+					continue
+				}
+
+				if !yield(uID, vID) {
+					return
+				}
 			}
-			edges = append(edges, e)
 		}
 	}
-
-	return edges
 }
 
-func (g *Graph[T]) Neighbours(id T) Set[T] {
-	neighbours := NewSet[T]()
-
-	for uID := range g.edges[id] {
-		neighbours.Add(uID)
+func (g *Graph[T]) Neighbours(id T) iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for vID := range g.edges[id] {
+			if !yield(vID) {
+				return
+			}
+		}
 	}
-
-	return neighbours
 }
 
 func (g *Graph[T]) Order() int {

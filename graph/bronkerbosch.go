@@ -20,9 +20,19 @@ type storage[T comparable] struct {
 func newStorage[T comparable](g *collection.Graph[T]) storage[T] {
 	return storage[T]{
 		current:    collection.NewSet[T](),
-		candidates: g.Vertices().Clone(),
+		candidates: newCandidates(g),
 		excluded:   collection.NewSet[T](),
 	}
+}
+
+func newCandidates[T comparable](g *collection.Graph[T]) collection.Set[T] {
+	candidates := collection.NewSet[T]()
+
+	for uID := range g.Vertices() {
+		candidates.Add(uID)
+	}
+
+	return candidates
 }
 
 func MaxIndependentSets[T comparable](g *collection.Graph[T]) []collection.Set[T] {
@@ -76,10 +86,11 @@ func (bk *bronKerbosch[T]) maxIndepSets(g *collection.Graph[T], current, candida
 	for x := range seek {
 		bk.ops++
 
+		nextNeighbours := neighbours(g, x)
+
 		nextCurrent := current.Clone()
 		nextCurrent.Add(x)
 
-		nextNeighbours := g.Neighbours(x)
 		nextCandidates := collection.Difference(candidates, nextNeighbours)
 		nextCandidates.Remove(x)
 
@@ -123,15 +134,16 @@ func (bk *bronKerbosch[T]) maxCliques(g *collection.Graph[T], current, candidate
 		}
 	}
 
-	seek := collection.Difference(candidates, g.Neighbours(pivotID))
+	seek := collection.Difference(candidates, neighbours(g, pivotID))
 
 	for x := range seek {
 		bk.ops++
 
+		nextNeighbours := neighbours(g, x)
+
 		nextCurrent := current.Clone()
 		nextCurrent.Add(x)
 
-		nextNeighbours := g.Neighbours(x)
 		nextCandidates := collection.Intersection(candidates, nextNeighbours)
 		nextExcluded := collection.Intersection(excluded, nextNeighbours)
 
@@ -160,7 +172,7 @@ func delta[T comparable](g *collection.Graph[T], candidates, excluded collection
 	)
 
 	for x := range excluded {
-		inter := collection.Intersection(candidates, g.Neighbours(x))
+		inter := collection.Intersection(candidates, neighbours(g, x))
 		delta := inter.Len()
 
 		if delta < bestDelta {
@@ -179,10 +191,20 @@ func delta[T comparable](g *collection.Graph[T], candidates, excluded collection
 
 func hasEmptyIntersection[T comparable](g *collection.Graph[T], candidates, excluded collection.Set[T]) bool {
 	for x := range excluded {
-		if collection.Intersection(candidates, g.Neighbours(x)).IsEmpty() {
+		if collection.Intersection(candidates, neighbours(g, x)).IsEmpty() {
 			return true
 		}
 	}
 
 	return false
+}
+
+func neighbours[T comparable](g *collection.Graph[T], uID T) collection.Set[T] {
+	n := collection.NewSet[T]()
+
+	for vID := range g.Neighbours(uID) {
+		n.Add(vID)
+	}
+
+	return n
 }
