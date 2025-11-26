@@ -6,7 +6,7 @@ import (
 	"github.com/ayaxdd/algorithm-design/collection"
 )
 
-func NewBFSIterator[T comparable](g *collection.Graph[T], startID T) iter.Seq[T] {
+func NewBFSIterator[T comparable](g collection.Graph[T], startID T) iter.Seq[T] {
 	return func(yield func(T) bool) {
 		// n := g.Order()
 		visited := collection.NewSet[T]()
@@ -34,7 +34,7 @@ func NewBFSIterator[T comparable](g *collection.Graph[T], startID T) iter.Seq[T]
 }
 
 func bfs[T comparable](
-	g *collection.Graph[T],
+	g collection.Graph[T],
 	sID T,
 	visited collection.Set[T],
 	yield func(T) bool,

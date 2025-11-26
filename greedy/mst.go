@@ -11,7 +11,7 @@ import (
 
 // Prim's algorithm
 
-func Prim[T comparable](g *collection.Graph[T]) *collection.Graph[T] {
+func Prim[T comparable](g collection.Graph[T]) collection.Graph[T] {
 	n := g.Order()
 	pred := make(map[T]T, n)
 	key := make(map[T]int, n)
@@ -84,7 +84,7 @@ func Prim[T comparable](g *collection.Graph[T]) *collection.Graph[T] {
 	return mst
 }
 
-func Kruskal[T comparable](g *collection.Graph[T]) (*collection.Graph[T], int) {
+func Kruskal[T comparable](g collection.Graph[T]) (collection.Graph[T], int) {
 	edges := make([][2]T, 0, g.EdgeCnt())
 	for uID, vID := range g.Edges() {
 		e := [2]T{uID, vID}

@@ -17,7 +17,7 @@ type storage[T comparable] struct {
 	current, candidates, excluded collection.Set[T]
 }
 
-func newStorage[T comparable](g *collection.Graph[T]) storage[T] {
+func newStorage[T comparable](g collection.Graph[T]) storage[T] {
 	return storage[T]{
 		current:    collection.NewSet[T](),
 		candidates: newCandidates(g),
@@ -25,7 +25,7 @@ func newStorage[T comparable](g *collection.Graph[T]) storage[T] {
 	}
 }
 
-func newCandidates[T comparable](g *collection.Graph[T]) collection.Set[T] {
+func newCandidates[T comparable](g collection.Graph[T]) collection.Set[T] {
 	candidates := collection.NewSet[T]()
 
 	for uID := range g.Vertices() {
@@ -35,7 +35,7 @@ func newCandidates[T comparable](g *collection.Graph[T]) collection.Set[T] {
 	return candidates
 }
 
-func MaxIndependentSets[T comparable](g *collection.Graph[T]) []collection.Set[T] {
+func MaxIndependentSets[T comparable](g collection.Graph[T]) []collection.Set[T] {
 	if g == nil {
 		return nil
 	}
@@ -50,7 +50,7 @@ func MaxIndependentSets[T comparable](g *collection.Graph[T]) []collection.Set[T
 	return bk.result
 }
 
-func MaxCliques[T comparable](g *collection.Graph[T]) []collection.Set[T] {
+func MaxCliques[T comparable](g collection.Graph[T]) []collection.Set[T] {
 	if g == nil {
 		return nil
 	}
@@ -65,7 +65,7 @@ func MaxCliques[T comparable](g *collection.Graph[T]) []collection.Set[T] {
 	return bk.result
 }
 
-func (bk *bronKerbosch[T]) maxIndepSets(g *collection.Graph[T], current, candidates, excluded collection.Set[T]) {
+func (bk *bronKerbosch[T]) maxIndepSets(g collection.Graph[T], current, candidates, excluded collection.Set[T]) {
 	if candidates.IsEmpty() && excluded.IsEmpty() {
 		bk.result = append(bk.result, current)
 		bk.sets++
@@ -103,7 +103,7 @@ func (bk *bronKerbosch[T]) maxIndepSets(g *collection.Graph[T], current, candida
 	}
 }
 
-func (bk *bronKerbosch[T]) maxCliques(g *collection.Graph[T], current, candidates, excluded collection.Set[T]) {
+func (bk *bronKerbosch[T]) maxCliques(g collection.Graph[T], current, candidates, excluded collection.Set[T]) {
 	if candidates.IsEmpty() && excluded.IsEmpty() {
 		if current.Len() < 2 {
 			return
@@ -158,7 +158,7 @@ func (bk *bronKerbosch[T]) maxCliques(g *collection.Graph[T], current, candidate
 // \Delta(x) -> min
 // if \Delta(x) == 0 => can't extend nextCurrent
 
-func delta[T comparable](g *collection.Graph[T], candidates, excluded collection.Set[T]) (T, collection.Set[T], bool) {
+func delta[T comparable](g collection.Graph[T], candidates, excluded collection.Set[T]) (T, collection.Set[T], bool) {
 	if excluded.IsEmpty() {
 		for x := range candidates {
 			return x, candidates, true
@@ -189,7 +189,7 @@ func delta[T comparable](g *collection.Graph[T], candidates, excluded collection
 	return bestX, bestSet, true
 }
 
-func hasEmptyIntersection[T comparable](g *collection.Graph[T], candidates, excluded collection.Set[T]) bool {
+func hasEmptyIntersection[T comparable](g collection.Graph[T], candidates, excluded collection.Set[T]) bool {
 	for x := range excluded {
 		if collection.Intersection(candidates, neighbours(g, x)).IsEmpty() {
 			return true
@@ -199,7 +199,7 @@ func hasEmptyIntersection[T comparable](g *collection.Graph[T], candidates, excl
 	return false
 }
 
-func neighbours[T comparable](g *collection.Graph[T], uID T) collection.Set[T] {
+func neighbours[T comparable](g collection.Graph[T], uID T) collection.Set[T] {
 	n := collection.NewSet[T]()
 
 	for vID := range g.Neighbours(uID) {

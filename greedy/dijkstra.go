@@ -8,7 +8,7 @@ import (
 	"github.com/ayaxdd/algorithm-design/collection"
 )
 
-func DijkstraPathFind[T comparable](g *collection.Graph[T], startID T) {
+func DijkstraPathFind[T comparable](g collection.Graph[T], startID T) {
 	n := g.Order()
 	pred := make(map[T]T, n)
 	paths := make(map[T]int, n)

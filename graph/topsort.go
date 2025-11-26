@@ -10,12 +10,12 @@ import (
 
 // Kahn's algorithm
 
-func TopSort[T comparable](g *collection.Graph[T]) ([]T, bool) {
+func TopSort[T comparable](g collection.Graph[T]) ([]T, bool) {
 	return dfsTopSort(g)
 	// return kahnTopSort(g)
 }
 
-func kahnTopSort[T comparable](g *collection.Graph[T]) ([]T, bool) {
+func kahnTopSort[T comparable](g collection.Graph[T]) ([]T, bool) {
 	n := g.Order()
 	order := make([]T, 0, n)
 	indegrees := make(map[T]int)
@@ -48,7 +48,7 @@ func kahnTopSort[T comparable](g *collection.Graph[T]) ([]T, bool) {
 	return order, len(order) == n
 }
 
-func dfsTopSort[T comparable](g *collection.Graph[T]) ([]T, bool) {
+func dfsTopSort[T comparable](g collection.Graph[T]) ([]T, bool) {
 	n := g.Order()
 	stack := collection.NewStack[T]()
 	colors := make(map[T]utils.Color)

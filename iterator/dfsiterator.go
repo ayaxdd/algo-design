@@ -2,6 +2,7 @@
 package iterator
 
 import (
+	"fmt"
 	"iter"
 
 	"github.com/ayaxdd/algorithm-design/collection"
@@ -9,10 +10,25 @@ import (
 
 // TODO: Iterative approach
 
-func NewDFSIterator[T comparable](g *collection.Graph[T], startID T) iter.Seq[T] {
+type DFS[T comparable] struct {
+	it      iter.Seq[T]
+	visited collection.Set[T]
+}
+
+type dFS struct{}
+
+func NewDfs() dFS {
+	return dFS{}
+}
+
+func (d dFS) Smth() {
+	fmt.Println("ddd")
+}
+
+func NewDFSIterator[T comparable](g collection.Graph[T], visited collection.Set[T], startID T) iter.Seq[T] {
 	return func(yield func(T) bool) {
 		// n := g.Order()
-		visited := collection.NewSet[T]()
+		// visited := collection.NewSet[T]()
 
 		if _, exists := g.Vertex(startID); !exists {
 			return
@@ -36,7 +52,7 @@ func NewDFSIterator[T comparable](g *collection.Graph[T], startID T) iter.Seq[T]
 }
 
 func dfs[T comparable](
-	g *collection.Graph[T],
+	g collection.Graph[T],
 	uID T,
 	visited collection.Set[T],
 	yield func(T) bool,
