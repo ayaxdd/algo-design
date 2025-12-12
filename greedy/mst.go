@@ -166,10 +166,10 @@ func (uf *unionFind[T]) union(uID, vID T) bool {
 
 	if uf.size[root1] < uf.size[root2] {
 		uf.parent[root1] = root2
-		uf.size[root2]++
+		uf.size[root2] += uf.size[root1]
 	} else {
 		uf.parent[root2] = root1
-		uf.size[root1]++
+		uf.size[root1] += uf.size[root2]
 	}
 
 	return true
